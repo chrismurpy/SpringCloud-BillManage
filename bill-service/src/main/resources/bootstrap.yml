@@ -1,0 +1,19 @@
+spring:
+  cloud:
+    config:
+      name: bill
+      profile: dev
+      lable: master
+      discovery:
+        enabled: true
+        service-id: config-service
+  # 配置rabbitmq信息；如果都与默认值一致则不需要配置
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+eureka:
+  client:
+    service-url:
+      defaultZone: http://127.0.0.1:9093/eureka

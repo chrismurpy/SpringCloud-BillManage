@@ -1,0 +1,19 @@
+server:
+  port: ${port:9093}
+spring:
+  application:
+    name: eureka-server
+eureka:
+  client:
+    service-url:
+      # Eureka服务的地址
+      defaultZone: http://127.0.0.1:9093/eureka
+    # 不注册自己
+    register-with-eureka: false
+    # 不拉取服务
+    fetch-registry: false
+  server:
+    # 服务失效 剔除间隔时间 - 默认60S
+    eviction-interval-timer-in-ms: 10000
+    # 关闭自我保护
+    enable-self-preservation: false

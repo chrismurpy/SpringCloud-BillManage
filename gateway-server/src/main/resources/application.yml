@@ -1,0 +1,50 @@
+server:
+  port: 10010
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        # 路由的ID - 自定义
+        - id: bill-service-route
+          # 代理的微服务地址
+          uri: lb://bill-service
+          # 路由断言
+          predicates:
+            - Path=/api/bill/**
+          filters:
+            - StripPrefix=1
+            - MyParam=name
+      default-filters:
+        # 添加响应头的名字/值
+        - AddResponseHeader=X-Response-Foo, Bar
+        - AddResponseHeader=Author, murphy
+      globalcors:
+        # 进行跨域配置
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: # 允许来自allowOrigins的allowedMethods方法访问此网关
+              - "*"  # *为允许所有
+            allowedMethods:
+              - GET
+              - POST
+eureka:
+  client:
+    service-url:
+      defaultZone: http://127.0.0.1:9093/eureka
+  instance:
+    prefer-ip-address: true
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            # 服务降级超时时间 - 默认1S
+            timeoutInMilliseconds: 6000
+ribbon:
+  ConnectTimeout: 1000 # 连接超时时长
+  ReadTimeout: 2000 # 数据通信超时时长
+  MaxAutoRetries: 0 # 当前服务器的重试次数
+  MaxAutoRetriesNextServer: 0 # 重试多少次服务
