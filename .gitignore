@@ -1,0 +1,5 @@
+# Project exclude paths
+/bill-service/target/
+/config-service/target/
+/eureka-server/target/
+/gateway-server/target/

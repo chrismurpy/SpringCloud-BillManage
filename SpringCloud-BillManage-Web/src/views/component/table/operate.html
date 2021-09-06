@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>数据操作 - 数据表格</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" href="../../../static/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../static/style/admin.css" media="all">
+    <script src="../../../static/json/table/user.js"></script>
+    <script src="../../js/jquery-1.4.1.js"></script>
+</head>
+<body>
+
+<div class="layui-card layadmin-header">
+    <div class="layui-breadcrumb" lay-filter="breadcrumb">
+        <a lay-href="">主页</a>
+        <a><cite>组件</cite></a>
+        <a><cite>数据表格</cite></a>
+        <a><cite>数据操作</cite></a>
+    </div>
+</div>
+
+
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body">
+                    <form class="layui-form" action="" lay-filter="component-form-group">
+                        <div class="layui-card-body" pad15>
+                            <div style="text-align: center" class="layui-form" wid100>
+                                <div class="layui-form-item">
+                                    <br>
+
+                                    <div class="layui-inline">
+                                        <label class="layui-form-label">开始时间</label>
+                                        <div class="layui-input-inline">
+                                            <input type="text" name="date1" class="layui-input"
+                                                   id="test-laydate-normal-cn1" placeholder="yyyy-MM-dd">
+                                        </div>
+                                    </div>
+                                    <div class="layui-inline">
+                                        <label class="layui-form-label">结束时间</label>
+                                        <div class="layui-input-inline">
+                                            <input type="text" name="date2" class="layui-input"
+                                                   id="test-laydate-normal-cn2" placeholder="yyyy-MM-dd">
+                                        </div>
+                                    </div>
+                                    <div class="layui-inline" id="search">
+                                        <select name="billTypes" id="billTypes" lay-search>
+                                            <option value="">可以通过类别查找</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="layui-inline" style="text-align:center">
+                                        <!--"搜索"按钮需要设置type="button"，否则点击“搜索”时，表单会提交两次（layui会自动提交一次）-->
+                                        <button type="button" class="layui-btn" lay-submit=""
+                                                lay-filter="component-form-demo1" id="selectByCondition">搜索
+                                        </button>
+                                        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                                        <button type="button" class="layui-btn" id="add">添加</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <div>
+                        <div style="text-align: center">
+                            <div class="layui-inline">
+                                <table class="layui-hide" id="test-table-operate"
+                                       lay-filter="test-table-operate"></table>
+                            </div>
+                        </div>
+
+
+                        <script type="text/html" id="test-table-operate-barDemo">
+                            <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+                            <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../../../static/layui/layui.js"></script>
+<script src="../../js/jquery-1.4.1.js"></script>
+<script>
+    //点击“添加”按钮，跳转到添加页面
+    $("#add").click(function () {
+        location.href = "../../home/add.html";
+    });
+
+    //获取所有账单类型
+    $(function () {
+        $.ajax({
+            url: 'http://localhost:10010/api/bill/billTypes',
+            type: 'GET',
+            dataType: 'json',
+            success: function (result) {
+                var types = result.data;
+                if (types != null && types.length != 0) {
+                    for (var i = 0; i < types.length; i++) {
+                        var option = "<option value=\"" + types[i].id + "\"";
+                        option += ">" + types[i].name + "</option>";  //动态添加数据
+                        $("select[name=billTypes]").append(option);
+                    }
+                }
+            }
+        });
+    });
+
+
+    layui.config({
+        base: '../../../static/' //静态资源所在路径
+    }).extend({
+        index: 'lib/index' //主入口模块
+    }).use(['index', 'table', 'laydate'], function () {
+        var table = layui.table
+            , admin = layui.admin;
+
+
+        table.render({
+            elem: '#test-table-operate'//表格容器的ID
+            , url: //请求数据的路径
+                'http://localhost:10010/api/bill/list-page'
+            , width: admin.screen() > 1 ? 892 : ''
+            , height: 480
+            , cols: [[<!--field对应Bill类的属性--> //列的内容
+                {type: 'checkbox', fixed: 'left'}<!--复选框-->
+                , {field: 'id', width: 60, title: 'ID', sort: true, fixed: 'left'}
+                , {field: 'title', width: 137, title: '标题'}
+                , {
+                    field: 'billTime',
+                    width: 120,
+                    title: '时间',
+                    templet: "<div>{{layui.util.toDateString(d.billTime,'yyyy-MM-dd')}}</div>"
+                }
+                , {field: 'price', width: 80, title: '金额'}
+                , {field: 'typeName', width: 60, title: '类别'}
+                , {field: 'explain', width: 200, title: '说明'}
+                , {width: 178, align: 'center', fixed: 'right', title: '操作', toolbar: '#test-table-operate-barDemo'}
+            ]]
+            , page: true
+            , limits: 5
+            , limits: [5, 10, 15, 20]
+            , id: 'billTable' // 表格ID，必须设置，重载部分需要用到
+        });
+
+        jQuery("#selectByCondition").click(function () {
+            var date1 = $("#test-laydate-normal-cn1").val();
+            var date2 = $("#test-laydate-normal-cn2").val();
+            var typeId = $("#billTypes").val();
+            console.log(date1)
+
+            table.reload('billTable', {
+                where: {//参数
+                    date1: date1,
+                    date2: date2,
+                    typeId: typeId
+                }, page: {
+                    curr: 1
+                }
+            })
+
+            //回显搜索条件
+            $("#test-laydate-normal-cn1").val(date1);
+            $("#test-laydate-normal-cn2").val(date2);
+            $("#billTypes").val(typeId);
+        })
+
+
+        //监听表格复选框选择
+        table.on('checkbox(test-table-operate)', function (obj) {
+            console.log(obj);
+        });
+        //监听工具条
+        table.on('tool(test-table-operate)', function (obj) {//obj对应每一条账单数据
+            var data = obj.data;
+            console.log(data);
+            if (obj.event === 'del') {//删除一条数据
+                layer.confirm('确认删除该数据吗？', function (index) {
+                    obj.del();
+                    layer.close(index);
+                    jQuery.ajax({
+                        url: 'http://localhost:10010/api/bill/delete/' + data.id,
+                        success: function (result) {
+                            location.reload();//刷新当前页面
+                        }
+                    });
+                });
+            } else if (obj.event === 'edit') {//更新一条数据
+                //layer.alert('编辑行：<br>' + JSON.stringify(data))
+                //将要修改的数据存在local storage中
+                localStorage.setItem("originalBillData", JSON.stringify(data));
+                //相对路径：
+                location.href = "../../home/update.html";
+            }
+        });
+
+        var $ = layui.$, active = {
+            getCheckData: function () { //获取选中数据
+                var checkStatus = table.checkStatus('test-table-operate')
+                    , data = checkStatus.data;
+                layer.alert(JSON.stringify(data));
+            },
+            isAll: function () { //验证是否全选
+                var checkStatus = table.checkStatus('test-table-operate');
+                layer.msg(checkStatus.isAll ? '全选' : '未全选')
+            }
+        };
+
+        $('.test-table-operate-btn .layui-btn').on('click', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+        var laydate = layui.laydate;
+
+        //示例代码
+        //常规用法
+        laydate.render({
+            elem: '#test-laydate-normal-cn1'
+        });
+        laydate.render({
+            elem: '#test-laydate-normal-cn2'
+        });
+    });
+</script>
+</body>
+</html>
